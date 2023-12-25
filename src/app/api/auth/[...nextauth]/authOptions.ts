@@ -1,22 +1,7 @@
 import TwitterProvider from "next-auth/providers/twitter"
+import { NextAuthOptions } from "next-auth";
 
-type TokenCallback = (options: {
-    token: Record<string, unknown>;
-    account?: Record<string, unknown>;
-}) => Promise<Record<string, unknown> | null>;
-  
-interface AuthCallbacks {
-    jwt?: TokenCallback;
-    session?: any
-}
-
-type Options = {
-    secret: string | undefined,
-    providers: any[],
-    callbacks: AuthCallbacks
-}
-
-export const authOptions : Options = {
+export const authOptions : NextAuthOptions = {
     secret: process.env.NEXTAUTH_SECRET,
     providers: [
         TwitterProvider({
@@ -28,8 +13,6 @@ export const authOptions : Options = {
         async jwt({ token, account }) {
           // Persist the OAuth access_token to the token right after signin
           if (account) {
-            // console.log(token); 
-            // console.log(account);
 
             token.accessToken  = account.oauth_token;
             token.refreshToken = account.oauth_token_secret;
@@ -40,10 +23,8 @@ export const authOptions : Options = {
         async session({session, token }: any){
             session.accessToken = token?.accessToken
             session.user.id = token.id
-            // console.log("Token", token);
-            
-            // console.log("Session: ", session);
+
             return session
         }
-      }
+      },
 }
