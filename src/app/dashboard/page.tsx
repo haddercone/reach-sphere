@@ -10,10 +10,13 @@ const DashBoard =async  () => {
   if(!session) {
     redirect("/")
   }
+
   return (
     <>
-      <p>Dashboard</p>
-      <LogOutButton/>
+      <p className='text-white'>Dashboard</p>
+      <div className='text-white'>
+        <LogOutButton/>
+      </div>
     </>
 
   )

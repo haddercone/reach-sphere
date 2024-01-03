@@ -12,17 +12,22 @@ export const authOptions : NextAuthOptions = {
     callbacks: {
         async jwt({ token, account }) {
           // Persist the OAuth access_token to the token right after signin
-          if (account) {
+          
+          if (account) {            
             token.accessToken  = account.oauth_token;
             token.refreshToken = account.oauth_token_secret;
           }
+
           return token;
         },
 
-        async session({session, token }: any){
+        async session({session, token}: any){
             session.accessToken = token?.accessToken
             session.refreshToken = token?.refreshToken
-            session.user.id = token.id
+            session.user.id = token.sub
+            
+            // console.log(session);
+            
             return session
         }
       },
