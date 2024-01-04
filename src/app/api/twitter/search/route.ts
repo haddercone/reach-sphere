@@ -1,35 +1,39 @@
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/authOptions";
+import { getSession } from "next-auth/react";
+import { getToken } from "next-auth/jwt";
 import type { NextApiRequest, NextApiResponse } from 'next';
+import Twitter from "twitter-lite";
 
 
 export async function GET(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    const session = await getServerSession(authOptions);
-    console.log(session);
 
-    if (!session) {
-        return NextResponse.json({msg: "You must be logged in"})
+    const token = await getToken({
+      req, 
+      secret: process.env.NEXTAUTH_SECRET
+    })
+    
+    if(token === null) {
+      return NextResponse.json({message: "Unauthorised"})
     }
-    return NextResponse.json({msg: "hello from protected route"})
-  } catch (error) {
-    console.error('Error fetching session:', error);
-  }
+    console.log(token);
+    
+    const client = new Twitter({
+      consumer_key: process.env.API_KEY as string, 
+      consumer_secret: process.env.API_KEY_SECRET as string, 
+      access_token_key: token.accessToken as string,
+      access_token_secret: token.refreshToken as string,
+    });
+
+    try {
+      const result = await client.get()
+      console.log(result);
+      
+      return NextResponse.json({data: result})
+    } catch (error) {
+      return NextResponse.json({error: error})
+    }
 }
-
-// export async function GET() { 
-  
-//     const session = await getServerSession(authOptions);
-//     console.log(session);
-//     if(!session){
-//         return NextResponse.json({msg: "You must be logged in"})
-//     }
-//     return NextResponse.json({msg: "hello from protected route"})
-
-//   }
-
 
 export async function POST(request: Request) {
     const data = await request.json();
